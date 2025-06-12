@@ -1,0 +1,195 @@
+/* Estilos generales */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    text-align: center;
+    background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+    margin: 0;
+    padding: 30px;
+    color: #fff;
+    user-select: none;
+}
+
+h1.game-title {
+    font-size: 2.8rem;
+    margin-bottom: 15px;
+    text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.7);
+}
+
+.track-wrapper {
+    width: 100%;
+    max-width: 900px;
+    margin: 0 auto;
+    overflow: visible;
+}
+
+#race-svg {
+    width: 100%;
+    height: auto;
+    display: block;
+}
+
+#question {
+    margin-bottom: 15px;
+    font-weight: 600;
+    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.6);
+}
+
+#answers button {
+    margin: 8px 12px;
+    padding: 12px 20px;
+    font-size: 1.2rem;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    border-radius: 12px;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    background: #2575fc;
+    color: white;
+    box-shadow: 0 4px 10px rgba(37, 117, 252, 0.6);
+}
+
+#answers button:hover:not(:disabled) {
+    background-color: #1b5ed7;
+    transform: scale(1.05);
+}
+
+#answers button:disabled {
+    background-color: #999;
+    cursor: not-allowed;
+    box-shadow: none;
+    transform: none;
+}
+
+#message {
+    margin-top: 18px;
+    font-weight: 700;
+    min-height: 26px;
+    text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.6);
+}
+
+/* Línea de meta */
+line {
+    filter: drop-shadow(0 0 4px #fff);
+}
+
+/* Texto meta */
+text {
+    filter: drop-shadow(0 0 3px #000);
+}
+
+/* Bandera animada */
+#flag {
+    filter: drop-shadow(0 0 5px rgba(0, 0, 0, 0.7));
+}
+
+/* Popup de victoria */
+.win-popup {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: rgba(255, 255, 255, 0.95);
+    padding: 20px;
+    border-radius: 20px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    text-align: center;
+    z-index: 200;
+    flex-direction: column;
+    gap: 15px;
+    animation: bounce 0.4s;
+    width: 85%;
+    max-width: 400px;
+}
+
+.win-popup p {
+    font-size: 1.2rem;
+    margin-bottom: 15px;
+    color: #3cb371;
+}
+
+.win-popup button {
+    padding: 8px 16px;
+    margin: 5px;
+    font-size: 0.9rem;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    background-color: #4ECDC4;
+    color: white;
+    transition: background-color 0.3s;
+}
+
+.win-popup button:hover {
+    background-color: #38b2ac;
+}
+
+/* RESPONSIVE */
+/* Ocultar título en móviles y tablets */
+@media (max-width: 768px) {
+    h1.game-title {
+        display: none;
+    }
+
+    body {
+        padding: 10px;
+    }
+
+    #answers button {
+        padding: 10px 14px;
+        font-size: 1rem;
+    }
+
+    #question {
+        font-size: 1.1rem;
+    }
+}
+
+/* Obligar orientación horizontal en móviles */
+@media screen and (orientation: portrait) {
+    body::before {
+        content: "Por favor gira tu dispositivo para jugar en horizontal 📱↪️";
+        position: fixed;
+        top: 0;
+        left: 0;
+        z-index: 9999;
+        background-color: rgba(0, 0, 0, 0.9);
+        color: white;
+        width: 100vw;
+        height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+        font-size: 1.5rem;
+        text-align: center;
+    }
+
+    #question-container,
+    .track-wrapper,
+    .win-popup {
+        display: none !important;
+    }
+}
+
+/* Personalización solo para móviles en orientación horizontal */
+@media screen and (orientation: landscape) and (max-width: 768px) {
+    h1.game-title {
+        display: none;
+    }
+
+    #question-container {
+        order: -1;
+        margin-bottom: 10px;
+    }
+
+    .mobile-wrapper {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    #answers {
+        margin-top: 20px;
+    }
+}

@@ -1,0 +1,210 @@
+html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    width: 100%;
+}
+    
+body {
+    margin: 0;
+    padding: 0;
+    background-image: url('assets/Fondo.png');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    font-family: 'Segoe UI', sans-serif;
+    color: #333;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+header {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    padding: 1rem;
+}
+
+.buttons-container {
+    display: flex;
+    gap: 15px;
+}
+
+.trophy-button, .leaderboard-button {
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    box-shadow: 0 0 10px rgba(0,0,0,0.2);
+    transition: transform 0.2s ease;
+}
+
+.trophy-button {
+    background-color: #3cb371;
+}
+
+.trophy-button:hover {
+    transform: scale(1.1);
+}
+
+.trophy-button i {
+    color: white;
+    font-size: 24px;
+}
+
+.leaderboard-button {
+    background-color: #4285f4;
+}
+
+.leaderboard-button:hover {
+    transform: scale(1.1);
+    background-color: #3367d6;
+}
+
+.leaderboard-button i {
+    color: white;
+    font-size: 22px;
+}
+
+main {
+    flex: 1;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    padding: 2rem;
+    justify-content: center;
+    align-content: center;
+}
+
+.game-card {
+    width: 200px;
+    min-width: 150px;
+    height: 150px;
+    background-color: rgba(255, 255, 255, 0.8);
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    font-size: 1.1rem;
+    font-weight: bold;
+    color: #333;
+    transition: transform 0.2s ease;
+    flex-grow: 1;
+    max-width: 300px;
+}
+
+.game-card:hover {
+    transform: scale(1.05);
+}
+.game-card.first-game {
+    background-size: cover;
+    background-position: center;
+    color: white;
+    text-shadow: 1px 1px 3px rgba(0,0,0,0.8);
+    /* Eliminamos el texto interno para que no se superponga */
+    font-size: 0;
+}
+.game-card.second-game {
+    background-size: cover;     /* <-- cambia cover por contain */
+    background-position: center;
+    color: white;
+    text-shadow: 1px 1px 3px rgba(0,0,0,0.8);
+    font-size: 0;
+}
+.game-card.first-game::after {
+    font-size: 1.1rem; /* Mismo tamaño que los otros game-cards */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+}
+.game-card.second-game::after {
+    font-size: 1.1rem; /* Mismo tamaño que los otros game-cards */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+}
+/* Responsive */
+@media (max-width: 768px) {
+    .game-card {
+        width: calc(50% - 30px);
+        height: 120px;
+    }
+}
+
+@media (max-width: 480px) {
+    .game-card {
+        width: 100%;
+        max-width: 250px;
+        height: 100px;
+}
+      
+.buttons-container {
+    gap: 10px;
+}
+      
+.trophy-button, .leaderboard-button {
+    width: 45px;
+    height: 45px;
+}
+      
+.trophy-button i {
+    font-size: 20px;
+}
+      
+.leaderboard-button i {
+    font-size: 18px;
+    }
+}
+
+/* Todo el CSS anterior se mantiene igual */
+.game-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+}
+
+.game-title {
+    font-family: 'Comic Sans MS', cursive, sans-serif;
+    font-size: 1.4rem;
+    font-weight: bold;
+    color: #FF6B6B;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+    background-color: #F7FFF7;
+    padding: 5px 15px;
+    border-radius: 20px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    border: 2px dashed #4ECDC4;
+    animation: bounce 2s infinite;
+}
+
+@keyframes bounce {
+    0%, 100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-5px);
+    }
+}
+
+@media (max-width: 768px) {
+    .game-title {
+        font-size: 1.2rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .game-title {
+        font-size: 1rem;
+        padding: 3px 10px;
+    }
+}

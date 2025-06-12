@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="styles.css">
+    <title>RestaManía - Carrera Matemática</title>
+</head>
+
+<body>
+    <h1>🚗 RestaManía - Carrera Matemática 🚗</h1>
+
+    <div class="mobile-wrapper">
+        <div id="question-container">
+            <h2 id="question"></h2>
+            <div id="answers"></div>
+            <div id="message"></div>
+        </div>
+
+        <div class="track-wrapper">
+            <svg id="race-svg" viewBox="-250 -100 1500 750" preserveAspectRatio="xMidYMid meet">
+                <defs>
+                    <pattern id="checkeredPattern" width="10" height="10" patternUnits="userSpaceOnUse">
+                        <rect width="5" height="5" fill="#fff" />
+                        <rect x="5" y="5" width="10" height="5" fill="#fff" />
+                        <rect x="5" width="5" height="5" fill="#000" />
+                        <rect y="5" width="5" height="5" fill="#000" />
+                    </pattern>
+                </defs>
+
+                <!-- Pasto -->
+                <path d="M 540,20 a 630,290 0 1,1 0,580 a 630,290 0 1,1 0,-580" fill="none" stroke="#2ecc71"
+                    stroke-width="80" />
+
+                <!-- Arena -->
+                <path d="M 500,70 a 570,230 0 1,1 0,460 a 500,230 0 1,1 0,-460" fill="#e4c29c" stroke="none" />
+
+                <!-- Pista gris -->
+                <path id="race-path" d="M 500,50 a 600,260 0 1,1 0,520 a 500,260 0 1,1 0,-520" fill="none"
+                    stroke="#424242" stroke-width="100" stroke-linecap="round" />
+
+                <!-- Línea de meta -->
+                <line x1="500" y1="0" x2="500" y2="100" stroke="#ffffff" stroke-width="6" stroke-dasharray="10,10" />
+                <text x="500" y="-10" text-anchor="middle" fill="#ffffff" font-size="26px" font-family="Arial"
+                    font-weight="bold">META</text>
+
+                <!-- Bandera -->
+                <g transform="translate(550, -35)">
+                    <path id="flag" fill="url(#checkeredPattern)"
+                        d="M0,0 Q10,5 20,0 Q30,-5 40,0 Q50,5 60,0 L60,30 Q50,25 40,30 Q30,35 20,30 Q10,25 0,30 Z">
+                        <animate attributeName="d" dur="1.5s" repeatCount="indefinite" values="
+            M0,0 Q10,5 20,0 Q30,-5 40,0 Q50,5 60,0 L60,30 Q50,25 40,30 Q30,35 20,30 Q10,25 0,30 Z;
+            M0,0 Q10,0 20,5 Q30,10 40,5 Q50,0 60,5 L60,30 Q50,30 40,25 Q30,20 20,25 Q10,30 0,25 Z;
+            M0,0 Q10,5 20,0 Q30,-5 40,0 Q50,5 60,0 L60,30 Q50,25 40,30 Q30,35 20,30 Q10,25 0,30 Z" />
+                    </path>
+                </g>
+
+                <!-- Grupo de líneas blancas separadas -->
+                <g id="track-segments"></g>
+
+                <!-- Autos -->
+                <image id="car-player" href="../assets/carro-deportivo.png" width="100" height="80" />
+                <image id="car-enemy" href="../assets/carro-deportivo4.png" width="100" height="80" />
+            </svg>
+        </div>
+    </div>
+    <!-- POPUP DE VICTORIA -->
+    <div class="win-popup" id="win-popup">
+        <p>¡Buen trabajo! Eres todo un genio sumando.</p>
+        <button onclick="continuePlaying()">Continuar jugando</button>
+        <button onclick="goToHome()">Volver al inicio</button>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+    <script>
+        const questionEl = document.getElementById('question');
+        const answersEl = document.getElementById('answers');
+        const messageEl = document.getElementById('message');
+        const questionContainer = document.getElementById('question-container');
+        const winPopup = document.getElementById('win-popup');
+
+        const path = document.getElementById('race-path');
+        const playerCar = document.getElementById('car-player');
+        const enemyCar = document.getElementById('car-enemy');
+        const pathLength = path.getTotalLength();
+
+        let correctAnswer;
+        let gameStarted = false;
+        let playerStep = 0;
+        let enemyStep = 0;
+        const totalSteps = 10;
+        const startPoint = path.getPointAtLength(0);
+
+        const segmentGroup = document.getElementById("track-segments");
+        const numSegments = 10;
+        const segmentLength = 30;
+        const spacing = pathLength / (numSegments + 1);
+
+        for (let i = 1; i <= numSegments; i++) {
+            const distance = spacing * i;
+            const point = path.getPointAtLength(distance);
+            const next = path.getPointAtLength(Math.min(distance + 1, pathLength));
+            const angle = Math.atan2(next.y - point.y, next.x - point.x);
+
+            const dx = Math.cos(angle) * segmentLength / 2;
+            const dy = Math.sin(angle) * segmentLength / 2;
+
+            const x1 = point.x - dx;
+            const y1 = point.y - dy;
+            const x2 = point.x + dx;
+            const y2 = point.y + dy;
+
+            const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+            line.setAttribute("x1", x1);
+            line.setAttribute("y1", y1);
+            line.setAttribute("x2", x2);
+            line.setAttribute("y2", y2);
+            line.setAttribute("stroke", "#ffffff");
+            line.setAttribute("stroke-width", "4");
+            line.setAttribute("stroke-linecap", "round");
+
+            segmentGroup.appendChild(line);
+        }
+
+        function generarResta() {
+            const num1 = Math.floor(Math.random() * 11) + 10;
+            const num2 = Math.floor(Math.random() * 11);
+            correctAnswer = num1 - num2;
+
+            questionEl.textContent = `¿Cuánto es ${num1} - ${num2}?`;
+            const opciones = [correctAnswer];
+            while (opciones.length < 3) {
+                const opcion = correctAnswer + Math.floor(Math.random() * 11) - 5;
+                if (!opciones.includes(opcion) && opcion >= 0) {
+                    opciones.push(opcion);
+                }
+            }
+            opciones.sort(() => Math.random() - 0.5);
+
+            answersEl.innerHTML = '';
+            opciones.forEach(opcion => {
+                const btn = document.createElement('button');
+                btn.textContent = opcion;
+                btn.onclick = () => responder(parseInt(btn.textContent));
+                answersEl.appendChild(btn);
+            });
+        }
+
+        function moveCar(car, progress) {
+            const distance = progress * pathLength;
+            const point = path.getPointAtLength(distance);
+            const nextPoint = path.getPointAtLength(Math.min(distance + 1, pathLength));
+            const angle = Math.atan2(nextPoint.y - point.y, nextPoint.x - point.x) * (180 / Math.PI);
+
+            let yOffset;
+            if (progress === 0) {
+                yOffset = car.id === "car-player" ? -40 : 40;
+                car.setAttribute("transform", `translate(${startPoint.x - 50},${startPoint.y + yOffset - 40}) rotate(0,50,40)`);
+            } else {
+                yOffset = car.id === "car-enemy" ? -25 : 25;
+                car.setAttribute("transform", `translate(${point.x - 50},${point.y + yOffset - 40}) rotate(${angle},50,40)`);
+            }
+        }
+
+        function responder(respuesta) {
+            if (!gameStarted) return;
+            Array.from(answersEl.children).forEach(btn => btn.disabled = true);
+
+            if (respuesta === correctAnswer) {
+                messageEl.textContent = '¡Correcto! Avanzas 1 paso.';
+                messageEl.style.color = '#a5d6a7';
+                playerStep++;
+                moveCar(playerCar, Math.min(playerStep / totalSteps, 1));
+
+                if (playerStep >= totalSteps) {
+                    mostrarPopupVictoria();
+                } else {
+                    setTimeout(siguienteTurno, 1000);
+                }
+            } else {
+                messageEl.textContent = 'Incorrecto, el enemigo avanza 1 paso.';
+                messageEl.style.color = '#ef9a9a';
+                enemyStep++;
+                moveCar(enemyCar, Math.min(enemyStep / totalSteps, 1));
+
+                if (enemyStep >= totalSteps) {
+                    mensajeFinal(false);
+                } else {
+                    setTimeout(siguienteTurno, 1000);
+                }
+            }
+        }
+
+        function siguienteTurno() {
+            messageEl.textContent = '';
+            generarResta();
+            Array.from(answersEl.children).forEach(btn => btn.disabled = false);
+        }
+
+        function mensajeFinal(gano) {
+            gameStarted = false;
+            questionContainer.style.display = 'none';
+
+            if (!gano) {
+                messageEl.style.color = '#ff6f61';
+                messageEl.textContent = '😞 ¡Perdiste! Intenta otra vez.';
+            }
+        }
+
+        function mostrarPopupVictoria() {
+            gameStarted = false;
+            questionContainer.style.display = 'none';
+            messageEl.textContent = '';
+            confetti({
+                particleCount: 200,
+                spread: 70,
+                origin: { y: 0.6 }
+            });
+            winPopup.style.display = 'flex';
+        }
+
+        function continuePlaying() {
+            winPopup.style.display = 'none';
+            startGame();
+        }
+
+        function goToHome() {
+            window.location.href = '../principal.html';
+        }
+
+        function startGame() {
+            gameStarted = true;
+            playerStep = 0;
+            enemyStep = 0;
+            messageEl.textContent = '';
+            questionContainer.style.display = 'block';
+            moveCar(playerCar, 0);
+            moveCar(enemyCar, 0);
+            siguienteTurno();
+        }
+
+        // Iniciar automáticamente a los 3 segundos
+        setTimeout(startGame, 3000);
+
+        // Posición inicial
+        moveCar(playerCar, 0);
+        moveCar(enemyCar, 0);
+    </script>
+</body>
+
+</html>

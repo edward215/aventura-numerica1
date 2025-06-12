@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="styles.css">
+    <title>Suma Explosiva</title>
+</head>
+
+<body>
+    <div class="score-container">
+        <div class="score">Aciertos: <span id="score">0</span></div>
+    </div>
+    <div class="game-container">
+        <div class="equation-container">
+            <div class="equation">
+                <span id="num1">_</span>
+                <span> + </span>
+                <span id="num2">_</span>
+                <span> = </span>
+                <div class="number-input" id="target-number">?</div>
+            </div>
+        </div>
+    </div>
+    <div class="message" id="message"></div>
+
+    <!-- 🎉 Ventana de felicitación -->
+    <div class="win-popup" id="win-popup">
+        <p>¡Buen trabajo! Eres todo un genio sumando.</p>
+        <button onclick="continuePlaying()">Continuar jugando</button>
+        <button onclick="goToHome()">Volver al inicio</button>
+    </div>
+
+    <script>
+        let score = 0;
+        let targetNumber = 0;
+        let firstNumberSelected = null;
+        let balloonInterval;
+
+        const scoreElement = document.getElementById('score');
+        const messageElement = document.getElementById('message');
+        const num1Element = document.getElementById('num1');
+        const num2Element = document.getElementById('num2');
+        const targetNumberElement = document.getElementById('target-number');
+        const gameContainer = document.querySelector('.game-container');
+        const winPopup = document.getElementById('win-popup');
+
+        function startGame() {
+            winPopup.style.display = 'none';
+            targetNumber = Math.floor(Math.random() * 14) + 2;
+            targetNumberElement.textContent = targetNumber;
+
+            firstNumberSelected = null;
+            num1Element.textContent = '_';
+            num2Element.textContent = '_';
+
+            document.querySelectorAll('.balloon').forEach(balloon => balloon.remove());
+
+            if (balloonInterval) clearInterval(balloonInterval);
+            balloonInterval = setInterval(generateBalloons, 2000);
+        }
+
+        function generateBalloons() {
+            const isMobile = window.innerWidth < 500;
+            const balloonCount = isMobile ?
+                Math.floor(Math.random() * 4) + 5 : // 5-8 globos en móvil
+                Math.floor(Math.random() * 6) + 8;  // 8-13 globos en desktop
+
+            const minDistance = isMobile ? 100 : 80; // Distancia mínima entre globos
+            const balloonWidth = Math.min(window.innerWidth * 0.15, 80);
+            const usedPositions = [];
+            const maxAttempts = 50; // Intentos máximos para colocar cada globo
+
+            for (let i = 0; i < balloonCount; i++) {
+                const randomNumber = Math.floor(Math.random() * 10) + 1;
+                let leftPos, attempts = 0, positionValid;
+
+                do {
+                    positionValid = true;
+                    leftPos = Math.floor(Math.random() * (window.innerWidth - balloonWidth));
+
+                    // Verificar que no se solape con otros globos
+                    for (const pos of usedPositions) {
+                        if (Math.abs(pos - leftPos) < minDistance) {
+                            positionValid = false;
+                            break;
+                        }
+                    }
+
+                    attempts++;
+                } while (!positionValid && attempts < maxAttempts);
+
+                if (positionValid) {
+                    usedPositions.push(leftPos);
+                    createBalloon(randomNumber, leftPos);
+                }
+            }
+        }
+
+        function createBalloon(number, leftPos) {
+            const balloon = document.createElement('div');
+            balloon.className = 'balloon';
+            balloon.dataset.number = number;
+
+            const safeLeft = Math.max(10, Math.min(leftPos, window.innerWidth - 90));
+            balloon.style.left = `${safeLeft}px`;
+            balloon.style.top = '-120px';
+
+            const baseSize = Math.min(window.innerWidth * 0.15, 80);
+            balloon.style.width = `${baseSize}px`;
+            balloon.style.height = `${baseSize * 1.25}px`;
+
+            balloon.style.backgroundImage = `url('../assets/juego1/balloon_${number}.png')`;
+            balloon.style.backgroundSize = 'contain';
+            balloon.style.backgroundRepeat = 'no-repeat';
+            balloon.style.backgroundPosition = 'center';
+            balloon.style.zIndex = '5';
+
+            balloon.addEventListener('click', () => {
+                handleBalloonClick(number);
+                balloon.remove();
+            });
+
+            gameContainer.appendChild(balloon);
+
+            const fallDuration = Math.random() * 3500 + 4000;
+            balloon.style.transition = `top ${fallDuration}ms linear`;
+
+            setTimeout(() => {
+                balloon.style.top = `${window.innerHeight}px`;
+            }, 100);
+
+            // Eliminar globos cuando salgan de la pantalla
+            setTimeout(() => {
+                if (balloon.parentNode) balloon.remove();
+            }, fallDuration + 100);
+        }
+
+        let milestone = 1;
+
+        function handleBalloonClick(number) {
+            if (!firstNumberSelected) {
+                firstNumberSelected = number;
+                num1Element.textContent = number;
+            } else {
+                const sum = firstNumberSelected + number;
+                num2Element.textContent = number;
+
+                if (sum === targetNumber) {
+                    showMessage('¡Correcto! ¡Buen trabajo!', true);
+                    score++;
+                    scoreElement.textContent = score;
+
+                    explodeBalloons(firstNumberSelected, number);
+                    clearInterval(balloonInterval);
+
+                    if (score >= milestone * 3) {
+                        milestone++;
+                        setTimeout(() => {
+                            winPopup.style.display = 'flex';
+                        }, 1000);
+                    } else {
+                        setTimeout(startGame, 2000);
+                    }
+                } else {
+                    showMessage('¡Qué mal! Te equivocaste. Vuelve a intentarlo, ¡no te rindas!', false);
+                    setTimeout(startGame, 2000);
+                }
+            }
+        }
+
+        function explodeBalloons(num1, num2) {
+            document.querySelectorAll('.balloon').forEach(balloon => {
+                const balloonNum = parseInt(balloon.dataset.number);
+                if (balloonNum === num1 || balloonNum === num2) {
+                    balloon.style.transition = 'all 0.3s';
+                    balloon.style.transform = 'scale(1.5)';
+                    balloon.style.opacity = '0';
+                    setTimeout(() => {
+                        if (balloon.parentNode) balloon.remove();
+                    }, 300);
+                }
+            });
+        }
+
+        function showMessage(text, isSuccess) {
+            messageElement.textContent = text;
+            messageElement.style.color = isSuccess ? '#3cb371' : '#FF6B6B';
+            messageElement.style.display = 'block';
+            setTimeout(() => {
+                messageElement.style.display = 'none';
+            }, 2000);
+        }
+
+        function continuePlaying() {
+            winPopup.style.display = 'none';
+            startGame();
+        }
+
+        function goToHome() {
+            window.location.href = '../principal/principal.html';
+        }
+
+        // Verificar y eliminar globos que ya no son visibles
+        function checkBalloonsVisibility() {
+            document.querySelectorAll('.balloon').forEach(balloon => {
+                const rect = balloon.getBoundingClientRect();
+                if (rect.top > window.innerHeight) {
+                    balloon.remove();
+                }
+            });
+        }
+
+        // Ejecutar la verificación periódicamente
+        setInterval(checkBalloonsVisibility, 500);
+
+        window.addEventListener('load', startGame);
+
+        window.addEventListener('resize', () => {
+            clearTimeout(window.resizeDebounce);
+            window.resizeDebounce = setTimeout(() => {
+                document.querySelectorAll('.balloon').forEach(balloon => {
+                    const currentTop = parseFloat(balloon.style.top);
+                    if (currentTop > 0 && currentTop < window.innerHeight) {
+                        const newLeft = Math.min(
+                            Math.max(10, Math.random() * (window.innerWidth - 100)),
+                            window.innerWidth - 110
+                        );
+                        balloon.style.left = `${newLeft}px`;
+                    }
+                });
+            }, 200);
+        });
+    </script>
+</body>
+
+</html>
